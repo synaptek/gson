@@ -1,36 +1,36 @@
-#Gson User Guide
+# Gson User Guide
 
 1. [Overview](#TOC-Overview)
 2. [Goals for Gson](#TOC-Goals-for-Gson)
 3. [Gson Performance and Scalability](#TOC-Gson-Performance-and-Scalability)
 4. [Gson Users](#TOC-Gson-Users)
 5. [Using Gson](#TOC-Using-Gson)
-  * [Using Gson with Maven](#TOC-Gson-With-Maven)
-  * [Primitives Examples](#TOC-Primitives-Examples)
-  * [Object Examples](#TOC-Object-Examples)
-  * [Finer Points with Objects](#TOC-Finer-Points-with-Objects)
-  * [Nested Classes (including Inner Classes)](#TOC-Nested-Classes-including-Inner-Classes-)
-  * [Array Examples](#TOC-Array-Examples)
-  * [Collections Examples](#TOC-Collections-Examples)
-    * [Collections Limitations](#TOC-Collections-Limitations)
-  * [Serializing and Deserializing Generic Types](#TOC-Serializing-and-Deserializing-Generic-Types)
-  * [Serializing and Deserializing Collection with Objects of Arbitrary Types](#TOC-Serializing-and-Deserializing-Collection-with-Objects-of-Arbitrary-Types)
-  * [Built-in Serializers and Deserializers](#TOC-Built-in-Serializers-and-Deserializers)
-  * [Custom Serialization and Deserialization](#TOC-Custom-Serialization-and-Deserialization)
-    * [Writing a Serializer](#TOC-Writing-a-Serializer)
-    * [Writing a Deserializer](#TOC-Writing-a-Deserializer)
-  * [Writing an Instance Creator](#TOC-Writing-an-Instance-Creator)
-    * [InstanceCreator for a Parameterized Type](#TOC-InstanceCreator-for-a-Parameterized-Type)
-  * [Compact Vs. Pretty Printing for JSON Output Format](#TOC-Compact-Vs.-Pretty-Printing-for-JSON-Output-Format)
-  * [Null Object Support](#TOC-Null-Object-Support)
-  * [Versioning Support](#TOC-Versioning-Support)
-  * [Excluding Fields From Serialization and Deserialization](#TOC-Excluding-Fields-From-Serialization-and-Deserialization)
-    * [Java Modifier Exclusion](#TOC-Java-Modifier-Exclusion)
-    * [Gson's `@Expose`](#TOC-Gson-s-Expose)
-    * [User Defined Exclusion Strategies](#TOC-User-Defined-Exclusion-Strategies)
-  * [JSON Field Naming Support](#TOC-JSON-Field-Naming-Support)
-  * [Sharing State Across Custom Serializers and Deserializers](#TOC-Sharing-State-Across-Custom-Serializers-and-Deserializers)
-  * [Streaming](#TOC-Streaming)
+   * [Using Gson with Maven](#TOC-Gson-With-Maven)
+   * [Primitives Examples](#TOC-Primitives-Examples)
+   * [Object Examples](#TOC-Object-Examples)
+   * [Finer Points with Objects](#TOC-Finer-Points-with-Objects)
+   * [Nested Classes (including Inner Classes)](#TOC-Nested-Classes-including-Inner-Classes-)
+   * [Array Examples](#TOC-Array-Examples)
+   * [Collections Examples](#TOC-Collections-Examples)
+     * [Collections Limitations](#TOC-Collections-Limitations)
+   * [Serializing and Deserializing Generic Types](#TOC-Serializing-and-Deserializing-Generic-Types)
+   * [Serializing and Deserializing Collection with Objects of Arbitrary Types](#TOC-Serializing-and-Deserializing-Collection-with-Objects-of-Arbitrary-Types)
+   * [Built-in Serializers and Deserializers](#TOC-Built-in-Serializers-and-Deserializers)
+   * [Custom Serialization and Deserialization](#TOC-Custom-Serialization-and-Deserialization)
+     * [Writing a Serializer](#TOC-Writing-a-Serializer)
+     * [Writing a Deserializer](#TOC-Writing-a-Deserializer)
+   * [Writing an Instance Creator](#TOC-Writing-an-Instance-Creator)
+     * [InstanceCreator for a Parameterized Type](#TOC-InstanceCreator-for-a-Parameterized-Type)
+   * [Compact Vs. Pretty Printing for JSON Output Format](#TOC-Compact-Vs.-Pretty-Printing-for-JSON-Output-Format)
+   * [Null Object Support](#TOC-Null-Object-Support)
+   * [Versioning Support](#TOC-Versioning-Support)
+   * [Excluding Fields From Serialization and Deserialization](#TOC-Excluding-Fields-From-Serialization-and-Deserialization)
+     * [Java Modifier Exclusion](#TOC-Java-Modifier-Exclusion)
+     * [Gson's `@Expose`](#TOC-Gson-s-Expose)
+     * [User Defined Exclusion Strategies](#TOC-User-Defined-Exclusion-Strategies)
+   * [JSON Field Naming Support](#TOC-JSON-Field-Naming-Support)
+   * [Sharing State Across Custom Serializers and Deserializers](#TOC-Sharing-State-Across-Custom-Serializers-and-Deserializers)
+   * [Streaming](#TOC-Streaming)
 6. [Issues in Designing Gson](#TOC-Issues-in-Designing-Gson)
 7. [Future Enhancements to Gson](#TOC-Future-Enhancements-to-Gson)
 
@@ -46,7 +46,7 @@ Gson can work with arbitrary Java objects including pre-existing objects that yo
 * Allow pre-existing unmodifiable objects to be converted to and from JSON
 * Allow custom representations for objects
 * Support arbitrarily complex objects
-* Generate compact and readability JSON output
+* Generate compact and readable JSON output
 
 ## <a name="TOC-Gson-Performance-and-Scalability"></a>Gson Performance and Scalability
 
@@ -62,7 +62,7 @@ Note: Delete the `disabled_` prefix to run these tests. We use this prefix to pr
 
 ## <a name="TOC-Gson-Users"></a>Gson Users
 
-Gson was originally created for use inside Google where it is currently used in a number of projects. It is now used by a number of public projects and companies. See details [here](https://sites.google.com/site/gson/gson-users).
+Gson was originally created for use inside Google where it is currently used in a number of projects. It is now used by a number of public projects and companies.
 
 ## <a name="TOC-Using-Gson"></a>Using Gson
 
@@ -79,7 +79,7 @@ To use Gson with Maven2/3, you can use the Gson version available in Maven Centr
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.5</version>
+      <version>2.8.0</version>
       <scope>compile</scope>
     </dependency>
 </dependencies>
@@ -104,7 +104,7 @@ Integer one = gson.fromJson("1", Integer.class);
 Long one = gson.fromJson("1", Long.class);
 Boolean false = gson.fromJson("false", Boolean.class);
 String str = gson.fromJson("\"abc\"", String.class);
-String anotherStr = gson.fromJson("[\"abc\"]", String.class);
+String[] anotherStr = gson.fromJson("[\"abc\"]", String[].class);
 ```
 
 ### <a name="TOC-Object-Examples"></a>Object Examples
@@ -141,8 +141,8 @@ BagOfPrimitives obj2 = gson.fromJson(json, BagOfPrimitives.class);
 * There is no need to use any annotations to indicate a field is to be included for serialization and deserialization. All fields in the current class (and from all super classes) are included by default.
 * If a field is marked transient, (by default) it is ignored and not included in the JSON serialization or deserialization.
 * This implementation handles nulls correctly
-* While serialization, a null field is skipped from the output
-* While deserialization, a missing entry in JSON results in setting the corresponding field in the object to null
+* While serializing, a null field is skipped from the output
+* While deserializing, a missing entry in JSON results in setting the corresponding field in the object to null
 * If a field is _synthetic_, it is ignored and not included in JSON serialization or deserialization
 * Fields corresponding to the outer classes in inner classes, anonymous classes, and local classes are ignored and not included in serialization or deserialization
 
@@ -169,7 +169,7 @@ public class A {
 
 **NOTE**: The above class B can not (by default) be serialized with Gson.
 
-Gson can not deserialize `{"b":"abc"}` into an instance of B since the class B is an inner class. if it was defined as static class B then Gson would have been able to deserialize the string. Another solution is to write a custom instance creator for B. 
+Gson can not deserialize `{"b":"abc"}` into an instance of B since the class B is an inner class. If it was defined as static class B then Gson would have been able to deserialize the string. Another solution is to write a custom instance creator for B. 
 
 ```java
 public class InstanceCreatorForB implements InstanceCreator<A.B> {
@@ -223,11 +223,8 @@ Unfortunately, there is no way to get around this in Java.
 
 #### <a name="TOC-Collections-Limitations"></a>Collections Limitations
 
-* Can serialize collection of arbitrary objects but can not deserialize from it
-* Because there is no way for the user to indicate the type of the resulting object
-* While deserializing, Collection must be of a specific generic type
-
-All of this makes sense, and is rarely a problem when following good Java coding practices.
+Gson can serialize collection of arbitrary objects but can not deserialize from it, because there is no way for the user to indicate the type of the resulting object. Instead, while deserializing, the Collection must be of a specific, generic type.
+This makes sense, and is rarely a problem when following good Java coding practices.
 
 ### <a name="TOC-Serializing-and-Deserializing-Generic-Types"></a>Serializing and Deserializing Generic Types
 
@@ -310,7 +307,7 @@ You can also find source code for some commonly used classes such as JodaTime at
 Sometimes default representation is not what you want. This is often the case when dealing with library classes (DateTime, etc).
 Gson allows you to register your own custom serializers and deserializers. This is done by defining two parts:
 
-* Json Serialiers: Need to define custom serialization for an object
+* Json Serializers: Need to define custom serialization for an object
 * Json Deserializers: Needed to define custom deserialization for a type
 
 * Instance Creators: Not needed if no-args constructor is available or a deserializer is registered
@@ -393,7 +390,7 @@ Type could be of a corresponding generic type
 
 #### <a name="TOC-InstanceCreator-for-a-Parameterized-Type"></a>InstanceCreator for a Parameterized Type
 
-Sometimes that the type that you are trying to instantiate is a parameterized type. Generally, this is not a problem since the actual instance is of raw type. Here is an example:
+Sometimes the type that you are trying to instantiate is a parameterized type. Generally, this is not a problem since the actual instance is of raw type. Here is an example:
 
 ```java
 class MyList<T> extends ArrayList<T> {
@@ -433,9 +430,9 @@ In the above example, an instance of the Id class can not be created without act
 
 ### <a name="TOC-Compact-Vs.-Pretty-Printing-for-JSON-Output-Format"></a>Compact Vs. Pretty Printing for JSON Output Format
 
-The default JSON output that is provide by Gson is a compact JSON format. This means that there will not be any whitespace in the output JSON structure. Therefore, there will be no whitespace between field names and its value, object fields, and objects within arrays in the JSON output. As well, "null" fields will be ignored in the output (NOTE: null values will still be included in collections/arrays of objects). See the [Null Object Support](#TOC-Null-Object-Support) section for information on configure Gson to output all null values.
+The default JSON output that is provided by Gson is a compact JSON format. This means that there will not be any whitespace in the output JSON structure. Therefore, there will be no whitespace between field names and its value, object fields, and objects within arrays in the JSON output. As well, "null" fields will be ignored in the output (NOTE: null values will still be included in collections/arrays of objects). See the [Null Object Support](#TOC-Null-Object-Support) section for information on configure Gson to output all null values.
 
-If you like to use the Pretty Print feature, you must configure your `Gson` instance using the `GsonBuilder`. The `JsonFormatter` is not exposed through our public API, so the client is unable to configure the default print settings/margins for the JSON output. For now, we only provide a default `JsonPrintFormatter` that has default line length of 80 character, 2 character indentation, and 4 character right margin.
+If you would like to use the Pretty Print feature, you must configure your `Gson` instance using the `GsonBuilder`. The `JsonFormatter` is not exposed through our public API, so the client is unable to configure the default print settings/margins for the JSON output. For now, we only provide a default `JsonPrintFormatter` that has default line length of 80 character, 2 character indentation, and 4 character right margin.
 
 The following is an example shows how to configure a `Gson` instance to use the default `JsonPrintFormatter` instead of the `JsonCompactFormatter`:
 ```
@@ -444,7 +441,7 @@ String jsonOutput = gson.toJson(someObject);
 ```
 ### <a name="TOC-Null-Object-Support"></a>Null Object Support
 
-The default behaviour that is implemented in Gson is that `null` object fields are ignored. This allows for a more compact output format; however, the client must define a default value for these fields as the JSON format is converted back into its Java.
+The default behaviour that is implemented in Gson is that `null` object fields are ignored. This allows for a more compact output format; however, the client must define a default value for these fields as the JSON format is converted back into its Java form.
 
 Here's how you would configure a `Gson` instance to output null:
 
@@ -525,7 +522,7 @@ The output is:
 
 ### <a name="TOC-Excluding-Fields-From-Serialization-and-Deserialization"></a>Excluding Fields From Serialization and Deserialization
 
-Gson supports numerous mechanisms for excluding top-level classes, fields and field types. Below are pluggable mechanism that allow field and class exclusion. If none of the below mechanism satisfy your needs then you can always use [custom serializers and deserializers](#TOC-Custom-Serialization-and-Deserializ).
+Gson supports numerous mechanisms for excluding top-level classes, fields and field types. Below are pluggable mechanisms that allow field and class exclusion. If none of the below mechanisms satisfy your needs then you can always use [custom serializers and deserializers](#TOC-Custom-Serialization-and-Deserialization).
 
 #### <a name="TOC-Java-Modifier-Exclusion"></a>Java Modifier Exclusion
 
@@ -538,7 +535,7 @@ Gson gson = new GsonBuilder()
     .create();
 ```
 
-NOTE: you can use any number of the `Modifier` constants to `excludeFieldsWithModifiers` method. For example:
+NOTE: you can give any number of the `Modifier` constants to the `excludeFieldsWithModifiers` method. For example:
 
 ```java
 Gson gson = new GsonBuilder()
@@ -658,7 +655,7 @@ In addition Gson's object model and data binding, you can use Gson to read from 
 
 ## <a name="TOC-Issues-in-Designing-Gson"></a>Issues in Designing Gson
 
-See the [Gson design document](https://sites.google.com/site/gson/gson-design-document "Gson design document") for a discussion of issues we faced while designing Gson. It also include a comparison of Gson with other Java libraries that can be used for Json conversion.
+See the [Gson design document](https://github.com/google/gson/blob/master/GsonDesignDocument.md "Gson design document") for a discussion of issues we faced while designing Gson. It also include a comparison of Gson with other Java libraries that can be used for Json conversion.
 
 ## <a name="TOC-Future-Enhancements-to-Gson"></a>Future Enhancements to Gson
 

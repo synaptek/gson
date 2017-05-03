@@ -262,15 +262,15 @@ public class ProtoTypeAdapter
           String jsonFieldName =
               getCustSerializedName(fieldDescriptor.getOptions(), fieldDescriptor.getName());
 
-          if (jsonObject.has(jsonFieldName)) {
-            JsonElement jsonElement = jsonObject.get(jsonFieldName);
+          JsonElement jsonElement = jsonObject.get(jsonFieldName);
+          if (jsonElement != null && !jsonElement.isJsonNull()) {
             // Do not reuse jsonFieldName here, it might have a custom value
             Object fieldValue;
             if (fieldDescriptor.getType() == ENUM_TYPE) {
               if (jsonElement.isJsonArray()) {
                 // Handling array
                 Collection<EnumValueDescriptor> enumCollection =
-                    new ArrayList<EnumValueDescriptor>();
+                    new ArrayList<EnumValueDescriptor>(jsonElement.getAsJsonArray().size());
                 for (JsonElement element : jsonElement.getAsJsonArray()) {
                   enumCollection.add(
                       findValueByNameAndExtension(fieldDescriptor.getEnumType(), element));

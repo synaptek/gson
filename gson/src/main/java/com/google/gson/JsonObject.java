@@ -133,6 +133,25 @@ public final class JsonObject extends JsonElement {
   }
 
   /**
+   * Returns a set of members key values.
+   *
+   * @return a set of member keys as Strings
+   * @since 2.8.1
+   */
+  public Set<String> keySet() {
+    return members.keySet();
+  }
+
+  /**
+   * Returns the number of key/value pairs in the object.
+   *
+   * @return the number of key/value pairs in the object.
+   */
+  public int size() {
+    return members.size();
+  }
+
+  /**
    * Convenience method to check if a member with the specified name is present in this object.
    *
    * @param memberName name of the member that is being checked for presence.

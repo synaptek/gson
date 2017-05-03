@@ -35,12 +35,11 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import static com.google.gson.internal.bind.JsonAdapterAnnotationTypeAdapterFactory.getTypeAdapter;
 
 /**
  * Type adapter that reflects over the fields and methods of a class.
@@ -49,12 +48,15 @@ public final class ReflectiveTypeAdapterFactory implements TypeAdapterFactory {
   private final ConstructorConstructor constructorConstructor;
   private final FieldNamingStrategy fieldNamingPolicy;
   private final Excluder excluder;
+  private final JsonAdapterAnnotationTypeAdapterFactory jsonAdapterFactory;
 
   public ReflectiveTypeAdapterFactory(ConstructorConstructor constructorConstructor,
-      FieldNamingStrategy fieldNamingPolicy, Excluder excluder) {
+      FieldNamingStrategy fieldNamingPolicy, Excluder excluder,
+      JsonAdapterAnnotationTypeAdapterFactory jsonAdapterFactory) {
     this.constructorConstructor = constructorConstructor;
     this.fieldNamingPolicy = fieldNamingPolicy;
     this.excluder = excluder;
+    this.jsonAdapterFactory = jsonAdapterFactory;
   }
 
   public boolean excludeField(Field f, boolean serialize) {
@@ -67,20 +69,22 @@ public final class ReflectiveTypeAdapterFactory implements TypeAdapterFactory {
 
   /** first element holds the default name */
   private List<String> getFieldNames(Field f) {
-    return getFieldName(fieldNamingPolicy, f);
-  }
+    SerializedName annotation = f.getAnnotation(SerializedName.class);
+    if (annotation == null) {
+      String name = fieldNamingPolicy.translateName(f);
+      return Collections.singletonList(name);
+    }
 
-  /** first element holds the default name */
-  static List<String> getFieldName(FieldNamingStrategy fieldNamingPolicy, Field f) {
-    SerializedName serializedName = f.getAnnotation(SerializedName.class);
-    List<String> fieldNames = new LinkedList<String>();
-    if (serializedName == null) {
-      fieldNames.add(fieldNamingPolicy.translateName(f));
-    } else {
-      fieldNames.add(serializedName.value());
-      for (String alternate : serializedName.alternate()) {
-        fieldNames.add(alternate);
-      }
+    String serializedName = annotation.value();
+    String[] alternates = annotation.alternate();
+    if (alternates.length == 0) {
+      return Collections.singletonList(serializedName);
+    }
+
+    List<String> fieldNames = new ArrayList<String>(alternates.length + 1);
+    fieldNames.add(serializedName);
+    for (String alternate : alternates) {
+      fieldNames.add(alternate);
     }
     return fieldNames;
   }
@@ -101,14 +105,23 @@ public final class ReflectiveTypeAdapterFactory implements TypeAdapterFactory {
       final TypeToken<?> fieldType, boolean serialize, boolean deserialize) {
     final boolean isPrimitive = Primitives.isPrimitive(fieldType.getRawType());
     // special casing primitives here saves ~5% on Android...
+    JsonAdapter annotation = field.getAnnotation(JsonAdapter.class);
+    TypeAdapter<?> mapped = null;
+    if (annotation != null) {
+      mapped = jsonAdapterFactory.getTypeAdapter(
+          constructorConstructor, context, fieldType, annotation);
+    }
+    final boolean jsonAdapterPresent = mapped != null;
+    if (mapped == null) mapped = context.getAdapter(fieldType);
+
+    final TypeAdapter<?> typeAdapter = mapped;
     return new ReflectiveTypeAdapterFactory.BoundField(name, serialize, deserialize) {
-      final TypeAdapter<?> typeAdapter = getFieldAdapter(context, field, fieldType);
       @SuppressWarnings({"unchecked", "rawtypes"}) // the type adapter and field type always agree
       @Override void write(JsonWriter writer, Object value)
           throws IOException, IllegalAccessException {
         Object fieldValue = field.get(value);
-        TypeAdapter t =
-          new TypeAdapterRuntimeTypeWrapper(context, this.typeAdapter, fieldType.getType());
+        TypeAdapter t = jsonAdapterPresent ? typeAdapter
+            : new TypeAdapterRuntimeTypeWrapper(context, typeAdapter, fieldType.getType());
         t.write(writer, fieldValue);
       }
       @Override void read(JsonReader reader, Object value)
@@ -124,15 +137,6 @@ public final class ReflectiveTypeAdapterFactory implements TypeAdapterFactory {
         return fieldValue != value; // avoid recursion for example for Throwable.cause
       }
     };
-  }
-
-  TypeAdapter<?> getFieldAdapter(Gson gson, Field field, TypeToken<?> fieldType) {
-    JsonAdapter annotation = field.getAnnotation(JsonAdapter.class);
-    if (annotation != null) {
-      TypeAdapter<?> adapter = getTypeAdapter(constructorConstructor, gson, fieldType, annotation);
-      if (adapter != null) return adapter;
-    }
-    return gson.getAdapter(fieldType);
   }
 
   private Map<String, BoundField> getBoundFields(Gson context, TypeToken<?> type, Class<?> raw) {
@@ -154,7 +158,7 @@ public final class ReflectiveTypeAdapterFactory implements TypeAdapterFactory {
         Type fieldType = $Gson$Types.resolve(type.getType(), raw, field.getGenericType());
         List<String> fieldNames = getFieldNames(field);
         BoundField previous = null;
-        for (int i = 0; i < fieldNames.size(); ++i) {
+        for (int i = 0, size = fieldNames.size(); i < size; ++i) {
           String name = fieldNames.get(i);
           if (i != 0) serialize = false; // only serialize the default name
           BoundField boundField = createBoundField(context, field, name,
